@@ -23,12 +23,10 @@ class DependencyParsePlugin {
     let i = 0;
     const len = Object.keys(this.directDeps).length;
     const dfs = (filePath) => {
-      console.log(`${i++} / ${len}`)
       const temp = this.directDeps[filePath] || [];
       const deps = [];
       deps.push(...temp);
       temp.forEach((_) => {
-        console.log(_)
         if (this.allDeps[_]) {
           deps.push(...this.allDeps[_]);
         } else {
