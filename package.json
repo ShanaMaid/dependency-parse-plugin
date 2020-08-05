@@ -1,6 +1,6 @@
 {
   "name": "dependency-parse-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Detect dependencies of each file in modules compiled with Webpack",
   "main": "index.js",
   "scripts": {
