@@ -76,7 +76,7 @@ class DependencyParsePlugin {
       
       const r  = this.parseModule(_.module);
      
-      if (r) {
+      if (r && !resource.includes('node_modules')) {
         this.directDeps[resource].push(r);
       }
     });
