@@ -61,7 +61,8 @@ class DependencyParsePlugin {
 
   parseModule = (module) => {
     let resource = module && module.resource;
-    if (!resource || this.directDeps[resource]) {
+
+    if (!resource || this.directDeps[resource] || resource.includes('node_modules')) {
       return resource;
     }
    
@@ -76,7 +77,7 @@ class DependencyParsePlugin {
       
       const r  = this.parseModule(_.module);
      
-      if (r && !resource.includes('node_modules')) {
+      if (r) {
         this.directDeps[resource].push(r);
       }
     });
@@ -95,12 +96,16 @@ class DependencyParsePlugin {
       const tempSet = new Set();
 
       filePaths.forEach((file) => {
-        if (regArrMatch(file, ignores)) {
+        if (ignores.length && regArrMatch(file, ignores)) {
           return;
         }
-        if (regArrMatch(file, whiteList)) {
-          
-        } else if (regArrMatch(file, blackList)) {
+        // 白名单代表可以引用
+        if (whiteList.length && regArrMatch(file, whiteList)) {
+          return;
+          // 黑名单代表不可以引用
+        } else if (blackList.length && regArrMatch(file, blackList)) {
+        } else {
+          // 两个名单都不在代表可以引用
           return;
         }
         const values = allDeps[file];
@@ -151,6 +156,9 @@ class DependencyParsePlugin {
         // 对解析完的依赖树进行过滤-去重
         Object.keys(this.directDeps).forEach((key) => {
           this.directDeps[key] = Array.from(new Set(this.directDeps[key].filter((_) => _ != key)));
+          if (this.directDeps[key].length === 0) {
+            delete this.directDeps[key];
+          }
         })
       });
       
@@ -159,6 +167,13 @@ class DependencyParsePlugin {
     // 编译完成，回抛依赖树
     compiler.hooks.done.tap(PluginTitle, () => {
       Object.keys(this.directDeps).forEach(this.parseOneFileAllDependency);
+      // 对解析完的依赖树进行过滤-去重
+      Object.keys(this.allDeps).forEach((key) => {
+        this.allDeps[key] = Array.from(new Set(this.allDeps[key].filter((_) => _ != key)));
+        if (this.allDeps[key].length === 0) {
+          delete this.allDeps[key];
+        }
+      })
       const { callback, detectDependences } = this.options;
       if (callback) {
         const params = {
@@ -170,6 +185,10 @@ class DependencyParsePlugin {
         }
         callback(params);
       }
+
+      // 执行完-清空数据
+      this.allDeps = {};
+      this.directDeps = {};
     });
   }
 }
