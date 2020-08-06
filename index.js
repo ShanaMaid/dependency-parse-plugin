@@ -1,6 +1,4 @@
 let PluginTitle = 'DependencyParsePlugin';
-const fs =require('fs');
-
 
 class DependencyParsePlugin {
   // 每个文件的直接依赖
@@ -19,9 +17,6 @@ class DependencyParsePlugin {
   }
 
   parseOneFileAllDependency = (filePath) => {
-    const result = {};
-    let i = 0;
-    const len = Object.keys(this.directDeps).length;
     const dfs = (filePath) => {
       const temp = this.directDeps[filePath] || [];
       const deps = [];
