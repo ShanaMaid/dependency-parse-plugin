@@ -65,34 +65,48 @@ class DependencyParsePlugin {
     if (!resource || this.directDeps[resource] || resource.includes('node_modules')) {
       return resource;
     }
-   
-    const { includes, excludes }  = this.options;
+
+    const {
+      includes,
+      excludes
+    } = this.options;
     if (includes.some((_) => resource.match(_))) {
-      
+
     } else if (excludes.some((_) => resource.match(_))) {
       return resource;
     }
     this.directDeps[resource] = [];
     (module.dependencies || []).forEach((_) => {
-      
-      const r  = this.parseModule(_.module);
-     
+
+      const r = this.parseModule(_.module);
+
       if (r) {
         this.directDeps[resource].push(r);
       }
     });
-  
+
     return resource;
   };
 
   parseTargetDependencies = () => {
-    const { allDeps, directDeps, options } = this;
-    const { detectDependences } = options;
+    const {
+      allDeps,
+      directDeps,
+      options
+    } = this;
+    const {
+      detectDependences
+    } = options;
     const filePaths = Object.keys(allDeps);
     const importPaths = [];
 
     detectDependences.forEach((item) => {
-      const { name, blackList = [], whiteList = [], ignores = ['node_modules']} = item;
+      const {
+        name,
+        blackList = [],
+        whiteList = [],
+        ignores = ['node_modules']
+      } = item;
       const tempSet = new Set();
 
       filePaths.forEach((file) => {
@@ -104,6 +118,7 @@ class DependencyParsePlugin {
           return;
           // 黑名单代表不可以引用
         } else if (blackList.length && regArrMatch(file, blackList)) {
+
         } else {
           // 两个名单都不在代表可以引用
           return;
@@ -116,15 +131,15 @@ class DependencyParsePlugin {
           }
         });
       });
-    
+
       // 对引用路径进行解析
       const parseImportPaths = (set) => {
         const result = [];
         const arr = Array.from(set);
         const dfs = (currentPath, paths = [currentPath]) => {
           let hasParent = false;
-          Object.keys(allDeps).forEach((_) => {
-            const v = allDeps[_];
+          Object.keys(directDeps).forEach((_) => {
+            const v = directDeps[_];
             if (v.includes(currentPath)) {
               hasParent = true;
               const temp = [...paths, _];
@@ -161,7 +176,7 @@ class DependencyParsePlugin {
           }
         })
       });
-      
+
     });
 
     // 编译完成，回抛依赖树
@@ -174,7 +189,10 @@ class DependencyParsePlugin {
           delete this.allDeps[key];
         }
       })
-      const { callback, detectDependences } = this.options;
+      const {
+        callback,
+        detectDependences
+      } = this.options;
       if (callback) {
         const params = {
           directDeps: this.directDeps,
