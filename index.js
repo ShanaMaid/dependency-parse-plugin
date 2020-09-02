@@ -23,6 +23,9 @@ class DependencyParsePlugin {
   // 每个文件的所有依赖
   allDeps = {};
 
+  // 循环依赖
+  circyleDeps = [];
+
   options = {
     includes: [],
     excludes: [],
@@ -42,15 +45,20 @@ class DependencyParsePlugin {
   }
 
   parseOneFileAllDependency = (filePath) => {
-    const dfs = (filePath) => {
+    const dfs = (filePath, importPaths = [filePath]) => {
       const temp = this.directDeps[filePath] || [];
       const deps = [];
       deps.push(...temp);
       temp.forEach((_) => {
+        // 循环依赖
+        if (importPaths.includes(_) ) {
+          this.circyleDeps.push([...importPaths, _]);
+          return;
+        }
         if (this.allDeps[_]) {
           deps.push(...this.allDeps[_]);
         } else {
-          deps.push(...dfs(_));
+          deps.push(...dfs(_, [...importPaths, _]));
         }
       });
       this.allDeps[filePath] = Array.from(new Set(deps));
@@ -203,10 +211,10 @@ class DependencyParsePlugin {
         }
         callback(params);
       }
-
       // 执行完-清空数据
       this.allDeps = {};
       this.directDeps = {};
+      this.circyleDeps = {};
     });
   }
 }
