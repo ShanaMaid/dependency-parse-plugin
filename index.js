@@ -205,6 +205,7 @@ class DependencyParsePlugin {
         const params = {
           directDeps: this.directDeps,
           allDeps: this.allDeps,
+          circyleDeps: this.circyleDeps,
         };
         if (detectDependences && detectDependences.length) {
           params.detectDependences = this.parseTargetDependencies();
