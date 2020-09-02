@@ -215,7 +215,7 @@ class DependencyParsePlugin {
       // 执行完-清空数据
       this.allDeps = {};
       this.directDeps = {};
-      this.circyleDeps = {};
+      this.circyleDeps = [];
     });
   }
 }
